@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BookNest - Campus Library</title>
+<style>
+  :root { --bg:#0f1226; --card:#1a1e3a; --line:#2b3060; --text:#eef0ff; --muted:#9aa0cf; --a:#7c5cff; --b:#00d4c8; --ok:#2ecc71; --bad:#ff6b6b; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+  nav { display:flex; justify-content:space-between; align-items:center; padding:16px 6vw; border-bottom:1px solid var(--line); position:sticky; top:0; background:rgba(15,18,38,.92); backdrop-filter:blur(8px); z-index:5; }
+  .logo { font-weight:800; font-size:1.3rem; }
+  .logo span { color:var(--b); }
+  nav a { color:var(--muted); text-decoration:none; font-weight:600; }
+  nav a:hover { color:var(--text); }
+  .hero { padding:60px 6vw 40px; background:linear-gradient(135deg,#3a2c9b,#7c5cff 55%,#00d4c8); }
+  .hero h1 { font-size:clamp(2rem,5vw,3.4rem); line-height:1.1; }
+  .hero p { margin-top:12px; max-width:520px; opacity:.9; }
+  .search { margin-top:24px; width:100%; max-width:480px; padding:14px 18px; border-radius:14px; border:none; font-size:1rem; outline:none; }
+  main { padding:30px 6vw 60px; }
+  .chips { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:24px; }
+  .chip { padding:8px 16px; border-radius:999px; border:1px solid var(--line); background:var(--card); color:var(--muted); cursor:pointer; font-weight:600; }
+  .chip.on { background:var(--a); color:#fff; border-color:var(--a); }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:20px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:22px; transition:transform .2s, border-color .2s; }
+  .card:hover { transform:translateY(-4px); border-color:var(--a); }
+  .emoji { font-size:3rem; }
+  .card h3 { margin-top:10px; font-size:1.05rem; }
+  .card small { color:var(--muted); display:block; margin-top:4px; }
+  .tag { display:inline-block; margin-top:10px; font-size:.75rem; padding:3px 10px; border-radius:999px; background:#262b55; color:var(--b); }
+  .row { display:flex; justify-content:space-between; align-items:center; margin-top:16px; }
+  .avail { font-size:.85rem; font-weight:700; }
+  .avail.ok { color:var(--ok); } .avail.no { color:var(--bad); }
+  button.res { background:linear-gradient(135deg,var(--a),var(--b)); border:none; color:#fff; padding:9px 16px; border-radius:10px; font-weight:700; cursor:pointer; }
+  button.res:disabled { background:#333857; color:#777; cursor:not-allowed; }
+  .modal { position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; padding:20px; z-index:10; }
+  .modal.show { display:flex; }
+  .box { background:var(--card); border:1px solid var(--line); border-radius:20px; padding:28px; width:100%; max-width:380px; }
+  .box h2 { margin-bottom:6px; }
+  .box p { color:var(--muted); margin-bottom:16px; }
+  .box input { width:100%; padding:12px; border-radius:10px; border:1px solid var(--line); background:var(--bg); color:var(--text); font-size:1rem; margin-bottom:14px; }
+  .actions { display:flex; gap:10px; justify-content:flex-end; }
+  .actions .ghost { background:transparent; border:1px solid var(--line); color:var(--muted); padding:9px 16px; border-radius:10px; cursor:pointer; }
+  #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(100px); background:var(--ok); color:#042; padding:12px 22px; border-radius:12px; font-weight:700; transition:transform .3s; z-index:20; }
+  #toast.show { transform:translateX(-50%) translateY(0); }
+  #toast.err { background:var(--bad); color:#fff; }
+  footer { text-align:center; color:var(--muted); padding:24px; border-top:1px solid var(--line); font-size:.85rem; }
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">📚 Book<span>Nest</span></div>
+  <a href="/reservations">Reservations →</a>
+</nav>
+
+<section class="hero">
+  <h1>Find it. Reserve it.<br>Read it.</h1>
+  <p>Reserve campus library books in seconds, no queues, no paperwork.</p>
+  <input id="q" class="search" placeholder="🔍 Search by title or author...">
+</section>
+
+<main>
+  <div class="chips" id="chips"></div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<div class="modal" id="modal">
+  <div class="box">
+    <h2>Reserve book</h2>
+    <p id="mtitle"></p>
+    <input id="student" placeholder="Your name">
+    <div class="actions">
+      <button class="ghost" onclick="closeModal()">Cancel</button>
+      <button class="res" onclick="confirmReserve()">Confirm</button>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+<footer>Built with Flask · Docker · Jenkins · Ansible</footer>
+
+<script>
+let books = [], cat = "All", pick = null;
+
+async function load() {
+  books = await (await fetch("/api/books")).json();
+  render();
+}
+
+function render() {
+  const cats = ["All", ...new Set(books.map(b => b.category))];
+  document.getElementById("chips").innerHTML = cats.map(c =>
+    `<button class="chip ${c === cat ? "on" : ""}" onclick="setCat('${c}')">${c}</button>`).join("");
+  const q = document.getElementById("q").value.toLowerCase();
+  const list = books.filter(b => (cat === "All" || b.category === cat) &&
+    (b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q)));
+  document.getElementById("grid").innerHTML = list.map(b => `
+    <div class="card">
+      <div class="emoji">${b.emoji}</div>
+      <h3>${b.title}</h3>
+      <small>${b.author}</small>
+      <span class="tag">${b.category}</span>
+      <div class="row">
+        <span class="avail ${b.available > 0 ? "ok" : "no"}">${b.available > 0 ? b.available + " available" : "Unavailable"}</span>
+        <button class="res" ${b.available > 0 ? "" : "disabled"} onclick="openModal(${b.id})">Reserve</button>
+      </div>
+    </div>`).join("") || "<p>No books found.</p>";
+}
+
+function setCat(c) { cat = c; render(); }
+document.getElementById("q").addEventListener("input", render);
+
+function openModal(id) {
+  pick = books.find(b => b.id === id);
+  document.getElementById("mtitle").textContent = pick.title;
+  document.getElementById("modal").classList.add("show");
+  document.getElementById("student").focus();
+}
+function closeModal() { document.getElementById("modal").classList.remove("show"); }
+
+function toast(msg, err) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.className = "show" + (err ? " err" : "");
+  setTimeout(() => t.className = "", 2800);
+}
+
+async function confirmReserve() {
+  const student = document.getElementById("student").value.trim();
+  const r = await fetch("/api/reserve", {
+    method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({student, book_id: pick.id})
+  });
+  const d = await r.json();
+  if (d.success) {
+    toast("✅ Reserved! ID #" + d.reservation_id);
+    document.getElementById("student").value = "";
+    closeModal(); load();
+  } else toast(d.message, true);
+}
+load();
+</script>
+</body>
+</html>

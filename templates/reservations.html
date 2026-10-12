@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BookNest - Reservations</title>
+<style>
+  body { font-family:'Segoe UI',system-ui,sans-serif; background:#0f1226; color:#eef0ff; margin:0; }
+  header { background:linear-gradient(135deg,#3a2c9b,#7c5cff 55%,#00d4c8); padding:28px 6vw; }
+  header a { color:#fff; text-decoration:none; opacity:.85; font-weight:600; }
+  header h1 { margin-top:8px; }
+  main { padding:30px 6vw; }
+  table { width:100%; border-collapse:collapse; background:#1a1e3a; border-radius:16px; overflow:hidden; }
+  th, td { padding:14px 18px; text-align:left; border-bottom:1px solid #2b3060; }
+  th { color:#9aa0cf; font-size:.8rem; text-transform:uppercase; letter-spacing:.05em; }
+  td.id { color:#00d4c8; font-weight:700; }
+  .empty { color:#9aa0cf; padding:30px; text-align:center; }
+</style>
+</head>
+<body>
+<header>
+  <a href="/">← Back to library</a>
+  <h1>📋 Reservations</h1>
+</header>
+<main>
+  {% if rows %}
+  <table>
+    <tr><th>ID</th><th>Book</th><th>Student</th><th>Reserved at</th></tr>
+    {% for r in rows %}
+    <tr><td class="id">#{{ r['id'] }}</td><td>{{ r['book_title'] }}</td><td>{{ r['student'] }}</td><td>{{ r['reserved_at'] }}</td></tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <div class="empty">No reservations yet.</div>
+  {% endif %}
+</main>
+</body>
+</html>

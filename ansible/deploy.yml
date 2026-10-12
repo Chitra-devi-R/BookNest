@@ -1,0 +1,16 @@
+---
+- hosts: dockerhost
+  tasks:
+    - name: Deploy BookNest container
+      community.docker.docker_container:
+        name: booknest-app
+        image: booknest-ci
+        state: started
+        recreate: true
+        restart_policy: unless-stopped
+        published_ports:
+          - "5002:5000"
+        env:
+          DB_PATH: /app/data/booknest.db
+        volumes:
+          - "booknest_data:/app/data"
