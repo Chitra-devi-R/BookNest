@@ -3,139 +3,819 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>BookNest - Campus Library</title>
+<title>BookNest | Campus Library</title>
+
 <style>
-  :root { --bg:#0f1226; --card:#1a1e3a; --line:#2b3060; --text:#eef0ff; --muted:#9aa0cf; --a:#7c5cff; --b:#00d4c8; --ok:#2ecc71; --bad:#ff6b6b; }
-  * { box-sizing:border-box; margin:0; padding:0; }
-  body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
-  nav { display:flex; justify-content:space-between; align-items:center; padding:16px 6vw; border-bottom:1px solid var(--line); position:sticky; top:0; background:rgba(15,18,38,.92); backdrop-filter:blur(8px); z-index:5; }
-  .logo { font-weight:800; font-size:1.3rem; }
-  .logo span { color:var(--b); }
-  nav a { color:var(--muted); text-decoration:none; font-weight:600; }
-  nav a:hover { color:var(--text); }
-  .hero { padding:60px 6vw 40px; background:linear-gradient(135deg,#3a2c9b,#7c5cff 55%,#00d4c8); }
-  .hero h1 { font-size:clamp(2rem,5vw,3.4rem); line-height:1.1; }
-  .hero p { margin-top:12px; max-width:520px; opacity:.9; }
-  .search { margin-top:24px; width:100%; max-width:480px; padding:14px 18px; border-radius:14px; border:none; font-size:1rem; outline:none; }
-  main { padding:30px 6vw 60px; }
-  .chips { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:24px; }
-  .chip { padding:8px 16px; border-radius:999px; border:1px solid var(--line); background:var(--card); color:var(--muted); cursor:pointer; font-weight:600; }
-  .chip.on { background:var(--a); color:#fff; border-color:var(--a); }
-  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:20px; }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:22px; transition:transform .2s, border-color .2s; }
-  .card:hover { transform:translateY(-4px); border-color:var(--a); }
-  .emoji { font-size:3rem; }
-  .card h3 { margin-top:10px; font-size:1.05rem; }
-  .card small { color:var(--muted); display:block; margin-top:4px; }
-  .tag { display:inline-block; margin-top:10px; font-size:.75rem; padding:3px 10px; border-radius:999px; background:#262b55; color:var(--b); }
-  .row { display:flex; justify-content:space-between; align-items:center; margin-top:16px; }
-  .avail { font-size:.85rem; font-weight:700; }
-  .avail.ok { color:var(--ok); } .avail.no { color:var(--bad); }
-  button.res { background:linear-gradient(135deg,var(--a),var(--b)); border:none; color:#fff; padding:9px 16px; border-radius:10px; font-weight:700; cursor:pointer; }
-  button.res:disabled { background:#333857; color:#777; cursor:not-allowed; }
-  .modal { position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; padding:20px; z-index:10; }
-  .modal.show { display:flex; }
-  .box { background:var(--card); border:1px solid var(--line); border-radius:20px; padding:28px; width:100%; max-width:380px; }
-  .box h2 { margin-bottom:6px; }
-  .box p { color:var(--muted); margin-bottom:16px; }
-  .box input { width:100%; padding:12px; border-radius:10px; border:1px solid var(--line); background:var(--bg); color:var(--text); font-size:1rem; margin-bottom:14px; }
-  .actions { display:flex; gap:10px; justify-content:flex-end; }
-  .actions .ghost { background:transparent; border:1px solid var(--line); color:var(--muted); padding:9px 16px; border-radius:10px; cursor:pointer; }
-  #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(100px); background:var(--ok); color:#042; padding:12px 22px; border-radius:12px; font-weight:700; transition:transform .3s; z-index:20; }
-  #toast.show { transform:translateX(-50%) translateY(0); }
-  #toast.err { background:var(--bad); color:#fff; }
-  footer { text-align:center; color:var(--muted); padding:24px; border-top:1px solid var(--line); font-size:.85rem; }
+:root {
+  --bg: #f5f7ff;
+  --card: #ffffff;
+  --text: #202344;
+  --muted: #777d9e;
+  --primary: #6750e8;
+  --secondary: #16b8ad;
+  --line: #e6e8f4;
+  --green: #168653;
+  --red: #dc4054;
+  --shadow: 0 12px 32px rgba(40, 44, 90, .09);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 7%;
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.logo {
+  font-size: 1.45rem;
+  font-weight: 850;
+}
+
+.logo span {
+  color: var(--primary);
+}
+
+.nav-links {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+nav a {
+  text-decoration: none;
+  color: var(--muted);
+  font-weight: 650;
+}
+
+nav a:hover {
+  color: var(--primary);
+}
+
+.nav-links .admin-link {
+  color: #fff;
+  background: linear-gradient(120deg, var(--primary), #8871ff);
+  padding: 10px 14px;
+  border-radius: 10px;
+  box-shadow: 0 5px 14px rgba(103, 80, 232, .18);
+  transition: transform .2s, filter .2s;
+}
+
+.nav-links .admin-link:hover {
+  color: #fff;
+  filter: brightness(1.07);
+  transform: translateY(-1px);
+}
+
+.hero {
+  padding: 64px 7% 54px;
+  background: linear-gradient(125deg, #4934b9, #7859f4 55%, #21c8b9);
+  color: #fff;
+}
+
+.hero .eyebrow {
+  display: inline-block;
+  padding: 7px 13px;
+  border-radius: 99px;
+  background: rgba(255,255,255,.17);
+  font-size: .85rem;
+  margin-bottom: 18px;
+}
+
+.hero h1 {
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  line-height: 1.12;
+  max-width: 700px;
+}
+
+.hero p {
+  margin-top: 14px;
+  max-width: 560px;
+  line-height: 1.7;
+  color: #f0edff;
+}
+
+.search-area {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+  max-width: 760px;
+}
+
+.search-wrap {
+  flex: 1 1 300px;
+  position: relative;
+}
+
+.search-wrap span {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.search {
+  width: 100%;
+  padding: 16px 16px 16px 46px;
+  border: 2px solid transparent;
+  border-radius: 14px;
+  outline: none;
+  font: inherit;
+  color: var(--text);
+}
+
+.search:focus {
+  border-color: #bcb0ff;
+}
+
+.search-area select {
+  padding: 14px;
+  border: 0;
+  border-radius: 14px;
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+  min-width: 175px;
+}
+
+main {
+  padding: 38px 7% 65px;
+}
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.section-heading h2 {
+  font-size: 1.65rem;
+}
+
+#resultCount {
+  color: var(--muted);
+  font-size: .92rem;
+}
+
+.chips {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+
+.chip {
+  padding: 9px 17px;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  background: #fff;
+  color: var(--muted);
+  cursor: pointer;
+  font-weight: 650;
+  transition: .2s;
+}
+
+.chip:hover,
+.chip.on {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(235px, 1fr));
+  gap: 22px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 23px;
+  box-shadow: 0 4px 15px rgba(40, 44, 90, .035);
+  transition: transform .2s, box-shadow .2s;
+  min-width: 0;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow);
+}
+
+.book-cover {
+  display: grid;
+  place-items: center;
+  min-height: 145px;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #eeeaff, #e1fbf7);
+  font-size: 4rem;
+}
+
+.card h3 {
+  margin-top: 17px;
+  font-size: 1.08rem;
+  line-height: 1.45;
+}
+
+.card small {
+  display: block;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+.tag {
+  display: inline-block;
+  margin-top: 13px;
+  padding: 6px 11px;
+  border-radius: 99px;
+  background: #f0edff;
+  color: #6049d1;
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+.avail {
+  margin-top: 17px;
+  font-size: .88rem;
+  font-weight: 750;
+}
+
+.avail.ok {
+  color: var(--green);
+}
+
+.avail.no {
+  color: var(--red);
+}
+
+.card-actions {
+  display: flex;
+  gap: 9px;
+  margin-top: 15px;
+}
+
+button {
+  font: inherit;
+}
+
+button.details,
+button.res,
+button.ghost {
+  border-radius: 10px;
+  padding: 10px 13px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: .2s;
+}
+
+button.details {
+  flex: 1;
+  border: 1px solid #d9d2ff;
+  background: #fff;
+  color: var(--primary);
+}
+
+button.details:hover {
+  background: #f0edff;
+}
+
+button.res {
+  flex: 1;
+  border: 0;
+  background: linear-gradient(120deg, var(--primary), #8871ff);
+  color: #fff;
+}
+
+button.res:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+button.res:disabled {
+  background: #d6d8e5;
+  color: #777d91;
+  cursor: not-allowed;
+}
+
+.empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 45px 20px;
+  border-radius: 18px;
+  border: 1px dashed #cfd2e5;
+  background: #fff;
+}
+
+.empty .empty-icon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+}
+
+.empty p {
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(24, 25, 55, .58);
+}
+
+.modal.show {
+  display: flex;
+}
+
+.box {
+  background: #fff;
+  color: var(--text);
+  border-radius: 22px;
+  padding: 28px;
+  width: 100%;
+  max-width: 430px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 80px rgba(0,0,0,.2);
+}
+
+.box h2 {
+  margin-bottom: 12px;
+}
+
+.box p {
+  color: var(--muted);
+  line-height: 1.7;
+  margin-bottom: 17px;
+  overflow-wrap: anywhere;
+}
+
+.box input {
+  width: 100%;
+  padding: 13px;
+  margin-bottom: 15px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  outline: none;
+  font: inherit;
+}
+
+.box input:focus {
+  border-color: var(--primary);
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+button.ghost {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--muted);
+}
+
+#toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translate(-50%, 120px);
+  background: #d9f8e7;
+  color: #12683e;
+  padding: 13px 22px;
+  border-radius: 12px;
+  font-weight: 700;
+  box-shadow: var(--shadow);
+  transition: transform .3s;
+  z-index: 20;
+  max-width: 90%;
+  text-align: center;
+}
+
+#toast.show {
+  transform: translate(-50%, 0);
+}
+
+#toast.err {
+  background: #ffe0e4;
+  color: #a21e36;
+}
+
+footer {
+  text-align: center;
+  color: var(--muted);
+  padding: 25px 15px;
+  border-top: 1px solid var(--line);
+  background: #fff;
+  font-size: .88rem;
+}
+
+@media (max-width: 600px) {
+  nav {
+    padding: 15px 5%;
+  }
+
+  .hero {
+    padding: 45px 5%;
+  }
+
+  main {
+    padding: 30px 5% 45px;
+  }
+
+  .search-area select {
+    width: 100%;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
 </style>
 </head>
+
 <body>
 <nav>
   <div class="logo">📚 Book<span>Nest</span></div>
-  <a href="/reservations">Reservations →</a>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/reservations">My Reservations →</a>
+    <a class="admin-link" href="/admin">⚙ Admin Dashboard</a>
+  </div>
 </nav>
 
 <section class="hero">
-  <h1>Find it. Reserve it.<br>Read it.</h1>
-  <p>Everything you Like!...</p>
-  <input id="q" class="search" placeholder="🔍 Search by title or author...">
+  <span class="eyebrow">YOUR CAMPUS LIBRARY</span>
+  <h1>Discover your next<br>great read.</h1>
+  <p>Explore your favourite books, discover new topics and reserve available books from your campus library.</p>
+
+  <div class="search-area">
+    <div class="search-wrap">
+      <span>🔎</span>
+      <input
+        id="q"
+        class="search"
+        type="search"
+        placeholder="Search by book title or author..."
+        aria-label="Search books"
+      >
+    </div>
+
+    <select id="categorySelect" aria-label="Filter by category">
+      <option value="All">All categories</option>
+    </select>
+  </div>
 </section>
 
 <main>
+  <div class="section-heading">
+    <h2>Explore Books 📚</h2>
+    <span id="resultCount">Loading books...</span>
+  </div>
+
   <div class="chips" id="chips"></div>
-  <div class="grid" id="grid"></div>
+  <div class="grid" id="grid" aria-live="polite"></div>
 </main>
 
-<div class="modal" id="modal">
+<!-- Book details popup -->
+<div class="modal" id="detailsModal">
   <div class="box">
-    <h2>Reserve book</h2>
-    <p id="mtitle"></p>
-    <input id="student" placeholder="Your name">
+    <h2 id="detailTitle">Book Details</h2>
+    <p id="detailInfo"></p>
     <div class="actions">
-      <button class="ghost" onclick="closeModal()">Cancel</button>
-      <button class="res" onclick="confirmReserve()">Confirm</button>
+      <button class="ghost" onclick="closeDetails()">Close</button>
+      <button class="res" id="detailReserve" onclick="reserveFromDetails()">Reserve</button>
     </div>
   </div>
 </div>
-<div id="toast"></div>
-<footer>Built with Flask · Docker · Jenkins · Ansible</footer>
+
+<!-- Reservation popup -->
+<div class="modal" id="modal">
+  <div class="box">
+    <h2>Reserve this book 📖</h2>
+    <p id="mtitle"></p>
+    <input id="student" type="text" maxlength="100" placeholder="Enter your name" autocomplete="name">
+    <div class="actions">
+      <button class="ghost" onclick="closeModal()">Cancel</button>
+      <button class="res" id="confirmButton" onclick="confirmReserve()">Confirm Reservation</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<footer>
+  <p>BookNest · Campus Library</p>
+  <p style="margin-top:6px">Powered by Flask · Docker · Jenkins · Pytest · Ansible</p>
+</footer>
 
 <script>
-let books = [], cat = "All", pick = null;
+let books = [];
+let cat = "All";
+let pick = null;
+let toastTimer;
+
+const grid = document.getElementById("grid");
+const searchInput = document.getElementById("q");
+const categorySelect = document.getElementById("categorySelect");
 
 async function load() {
-  books = await (await fetch("/api/books")).json();
-  render();
+  grid.innerHTML = '<p class="empty">Loading books...</p>';
+
+  try {
+    const response = await fetch("/api/books");
+
+    if (!response.ok) {
+      throw new Error("Unable to load books.");
+    }
+
+    books = await response.json();
+
+    if (!Array.isArray(books)) {
+      throw new Error("Invalid book data.");
+    }
+
+    updateCategories();
+    render();
+  } catch (error) {
+    grid.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">⚠️</div>
+        <h3>Unable to load books</h3>
+        <p>Please check that the BookNest server is running and try again.</p>
+        <button class="res" style="margin-top:16px" onclick="load()">Try Again</button>
+      </div>`;
+    document.getElementById("resultCount").textContent = "";
+  }
+}
+
+function updateCategories() {
+  const categories = ["All", ...new Set(books.map(book => book.category))];
+
+  categorySelect.innerHTML = categories.map(category =>
+    `<option value="${escapeHTML(category)}">${category === "All" ? "All categories" : escapeHTML(category)}</option>`
+  ).join("");
+
+  categorySelect.value = cat;
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
 }
 
 function render() {
-  const cats = ["All", ...new Set(books.map(b => b.category))];
-  document.getElementById("chips").innerHTML = cats.map(c =>
-    `<button class="chip ${c === cat ? "on" : ""}" onclick="setCat('${c}')">${c}</button>`).join("");
-  const q = document.getElementById("q").value.toLowerCase();
-  const list = books.filter(b => (cat === "All" || b.category === cat) &&
-    (b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q)));
-  document.getElementById("grid").innerHTML = list.map(b => `
-    <div class="card">
-      <div class="emoji">${b.emoji}</div>
-      <h3>${b.title}</h3>
-      <small>${b.author}</small>
-      <span class="tag">${b.category}</span>
-      <div class="row">
-        <span class="avail ${b.available > 0 ? "ok" : "no"}">${b.available > 0 ? b.available + " available" : "Unavailable"}</span>
-        <button class="res" ${b.available > 0 ? "" : "disabled"} onclick="openModal(${b.id})">Reserve</button>
+  const query = searchInput.value.trim().toLowerCase();
+
+  const categories = ["All", ...new Set(books.map(book => book.category))];
+
+  document.getElementById("chips").innerHTML = categories.map(category => `
+    <button
+      class="chip ${category === cat ? "on" : ""}"
+      onclick="setCat('${escapeHTML(category).replace(/'/g, "\\'")}')"
+      aria-pressed="${category === cat}">
+      ${category === "All" ? "✨ All Books" : escapeHTML(category)}
+    </button>
+  `).join("");
+
+  const filteredBooks = books.filter(book => {
+    const matchesCategory = cat === "All" || book.category === cat;
+    const matchesSearch =
+      String(book.title).toLowerCase().includes(query) ||
+      String(book.author).toLowerCase().includes(query);
+
+    return matchesCategory && matchesSearch;
+  });
+
+  document.getElementById("resultCount").textContent =
+    `${filteredBooks.length} ${filteredBooks.length === 1 ? "book" : "books"} found`;
+
+  if (filteredBooks.length === 0) {
+    grid.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">🔍</div>
+        <h3>No books found</h3>
+        <p>Try another title, author or category.</p>
+        <button class="res" style="margin-top:16px" onclick="clearFilters()">Clear Filters</button>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = filteredBooks.map(book => `
+    <article class="card">
+      <div class="book-cover">${escapeHTML(book.emoji || "📘")}</div>
+      <h3>${escapeHTML(book.title)}</h3>
+      <small>By ${escapeHTML(book.author)}</small>
+      <span class="tag">${escapeHTML(book.category)}</span>
+
+      <div class="avail ${book.available > 0 ? "ok" : "no"}">
+        ${book.available > 0
+          ? `✓ ${book.available} ${book.available === 1 ? "copy" : "copies"} available`
+          : "✕ Currently unavailable"}
       </div>
-    </div>`).join("") || "<p>No books found.</p>";
+
+      <div class="card-actions">
+        <button class="details" onclick="showDetails(${Number(book.id)})">Details</button>
+        <button
+          class="res"
+          ${book.available > 0 ? "" : "disabled"}
+          onclick="openModal(${Number(book.id)})">
+          Reserve
+        </button>
+      </div>
+    </article>
+  `).join("");
 }
 
-function setCat(c) { cat = c; render(); }
-document.getElementById("q").addEventListener("input", render);
+function setCat(category) {
+  cat = category;
+  categorySelect.value = category;
+  render();
+}
+
+function clearFilters() {
+  cat = "All";
+  searchInput.value = "";
+  categorySelect.value = "All";
+  render();
+}
+
+searchInput.addEventListener("input", render);
+
+categorySelect.addEventListener("change", event => {
+  cat = event.target.value;
+  render();
+});
+
+function showDetails(id) {
+  pick = books.find(book => book.id === id);
+
+  if (!pick) {
+    toast("Book not found. Please refresh.", true);
+    return;
+  }
+
+  document.getElementById("detailTitle").textContent =
+    `${pick.emoji || "📘"} ${pick.title}`;
+
+  document.getElementById("detailInfo").textContent =
+    `Author: ${pick.author}\n` +
+    `Category: ${pick.category}\n` +
+    `Total copies: ${pick.copies}\n` +
+    `Available copies: ${pick.available}\n\n` +
+    (pick.available > 0
+      ? "This book is available for reservation."
+      : "All copies are currently reserved.");
+
+  const reserveButton = document.getElementById("detailReserve");
+  reserveButton.disabled = pick.available <= 0;
+  reserveButton.textContent = pick.available > 0 ? "Reserve" : "Unavailable";
+
+  document.getElementById("detailsModal").classList.add("show");
+}
+
+function closeDetails() {
+  document.getElementById("detailsModal").classList.remove("show");
+}
+
+function reserveFromDetails() {
+  if (pick && pick.available > 0) {
+    const id = pick.id;
+    closeDetails();
+    openModal(id);
+  }
+}
 
 function openModal(id) {
-  pick = books.find(b => b.id === id);
-  document.getElementById("mtitle").textContent = pick.title;
+  pick = books.find(book => book.id === id);
+
+  if (!pick) {
+    toast("Book not found. Please refresh.", true);
+    return;
+  }
+
+  if (pick.available <= 0) {
+    toast("No copies available for this book.", true);
+    return;
+  }
+
+  document.getElementById("mtitle").textContent =
+    `${pick.title} by ${pick.author}`;
+
+  document.getElementById("student").value = "";
   document.getElementById("modal").classList.add("show");
   document.getElementById("student").focus();
 }
-function closeModal() { document.getElementById("modal").classList.remove("show"); }
 
-function toast(msg, err) {
-  const t = document.getElementById("toast");
-  t.textContent = msg; t.className = "show" + (err ? " err" : "");
-  setTimeout(() => t.className = "", 2800);
+function closeModal() {
+  document.getElementById("modal").classList.remove("show");
+}
+
+function toast(message, isError = false) {
+  const element = document.getElementById("toast");
+
+  clearTimeout(toastTimer);
+  element.textContent = message;
+  element.className = "show" + (isError ? " err" : "");
+
+  toastTimer = setTimeout(() => {
+    element.className = "";
+  }, 3000);
 }
 
 async function confirmReserve() {
+  if (!pick) {
+    toast("Please select a book first.", true);
+    return;
+  }
+
   const student = document.getElementById("student").value.trim();
-  const r = await fetch("/api/reserve", {
-    method: "POST", headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({student, book_id: pick.id})
-  });
-  const d = await r.json();
-  if (d.success) {
-    toast("✅ Reserved! ID #" + d.reservation_id);
-    document.getElementById("student").value = "";
-    closeModal(); load();
-  } else toast(d.message, true);
+
+  if (!student) {
+    toast("Please enter your name.", true);
+    document.getElementById("student").focus();
+    return;
+  }
+
+  const button = document.getElementById("confirmButton");
+  button.disabled = true;
+  button.textContent = "Reserving...";
+
+  try {
+    const response = await fetch("/api/reserve", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        student: student,
+        book_id: pick.id
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || "Reservation failed.");
+    }
+
+    toast(`✅ Reservation successful! ID #${data.reservation_id}`);
+    closeModal();
+    await load();
+  } catch (error) {
+    toast(error.message || "Unable to reserve. Please try again.", true);
+  } finally {
+    button.disabled = false;
+    button.textContent = "Confirm Reservation";
+  }
 }
+
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") {
+    closeDetails();
+    closeModal();
+  }
+});
+
+document.querySelectorAll(".modal").forEach(modal => {
+  modal.addEventListener("click", event => {
+    if (event.target === modal) {
+      modal.classList.remove("show");
+    }
+  });
+});
+
 load();
 </script>
 </body>
