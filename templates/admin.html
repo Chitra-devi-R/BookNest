@@ -1,0 +1,174 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BookNest Admin Dashboard</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:25px;font-family:Segoe UI,Arial,sans-serif;background:#10132b;color:#f2f3ff}
+main{max-width:1100px;margin:auto}
+a{color:#75eee3}
+.panel{background:#1b2042;padding:22px;border-radius:15px;margin:20px 0}
+input{padding:11px;margin:5px;border:1px solid #424974;border-radius:8px;background:#10132b;color:white}
+button{padding:10px 15px;border:0;border-radius:8px;background:#7660ff;color:white;cursor:pointer;margin:4px}
+.delete{background:#e94d70}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:12px;border-bottom:1px solid #363b60}
+.table-wrap{overflow-x:auto}
+#message{margin:12px 0}
+</style>
+</head>
+<body>
+<main>
+<h1>📚 BookNest Admin Dashboard</h1>
+<p><a href="/">← Back to Library</a> | <a href="/reservations">View Reservations</a></p>
+
+<section class="panel">
+<h2 id="formHeading">Add New Book</h2>
+<input id="title" placeholder="Book title">
+<input id="author" placeholder="Author">
+<input id="category" placeholder="Category">
+<input id="copies" type="number" min="1" value="1" placeholder="Copies">
+<input id="emoji" placeholder="Emoji" value="📚">
+<br>
+<button onclick="saveBook()">Save Book</button>
+<button onclick="clearForm()">Clear</button>
+<p id="message" role="status"></p>
+</section>
+
+<section class="panel">
+<h2>Manage Books</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Title / Author</th><th>Category</th><th>Total</th><th>Available</th><th>Actions</th></tr></thead>
+<tbody id="bookRows"></tbody>
+</table>
+</div>
+</section>
+</main>
+
+<script>
+let books = [];
+let editingId = null;
+
+async function loadBooks(){
+  const response = await fetch('/api/books');
+  books = await response.json();
+  const tbody = document.getElementById('bookRows');
+  tbody.replaceChildren();
+
+  books.forEach(book => {
+    const tr = document.createElement('tr');
+    const details = document.createElement('td');
+    details.textContent = `${book.emoji || '📚'} ${book.title} — ${book.author}`;
+
+    const category = document.createElement('td');
+    category.textContent = book.category;
+
+    const copies = document.createElement('td');
+    copies.textContent = book.copies;
+
+    const available = document.createElement('td');
+    available.textContent = book.available;
+
+    const actions = document.createElement('td');
+    const edit = document.createElement('button');
+    edit.textContent = 'Edit';
+    edit.onclick = () => editBook(book.id);
+
+    const del = document.createElement('button');
+    del.textContent = 'Delete';
+    del.className = 'delete';
+    del.onclick = () => deleteBook(book.id);
+
+    actions.append(edit, del);
+    tr.append(details, category, copies, available, actions);
+    tbody.appendChild(tr);
+  });
+}
+
+function clearForm(){
+  editingId = null;
+  document.getElementById('title').value = '';
+  document.getElementById('author').value = '';
+  document.getElementById('category').value = '';
+  document.getElementById('copies').value = 1;
+  document.getElementById('emoji').value = '📚';
+  document.getElementById('formHeading').textContent = 'Add New Book';
+}
+
+function editBook(id){
+  const book = books.find(b => b.id === id);
+  if(!book) return;
+
+  editingId = id;
+  document.getElementById('title').value = book.title;
+  document.getElementById('author').value = book.author;
+  document.getElementById('category').value = book.category;
+  document.getElementById('copies').value = book.copies;
+  document.getElementById('emoji').value = book.emoji || '📚';
+  document.getElementById('formHeading').textContent = 'Edit Book';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+async function saveBook(){
+  const message = document.getElementById('message');
+  const payload = {
+    title: document.getElementById('title').value.trim(),
+    author: document.getElementById('author').value.trim(),
+    category: document.getElementById('category').value.trim(),
+    copies: Number(document.getElementById('copies').value),
+    emoji: document.getElementById('emoji').value.trim() || '📚'
+  };
+
+  if(!payload.title || !payload.author || !payload.category || payload.copies < 1){
+    message.textContent = 'Please enter valid book details.';
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      editingId ? `/api/admin/books/${editingId}` : '/api/admin/books',
+      {
+        method: editingId ? 'PUT' : 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      }
+    );
+
+    const result = await response.json();
+    if(!response.ok) throw new Error(result.message || 'Could not save book');
+
+    message.textContent = 'Book saved successfully!';
+    clearForm();
+    await loadBooks();
+  } catch(error) {
+    message.textContent = error.message;
+  }
+}
+
+async function deleteBook(id){
+  if(!confirm('Delete this book?')) return;
+
+  const message = document.getElementById('message');
+  try {
+    const response = await fetch(`/api/admin/books/${id}`, {method:'DELETE'});
+    const result = await response.json();
+    if(!response.ok) throw new Error(result.message || 'Could not delete book');
+
+    message.textContent = 'Book deleted successfully!';
+    await loadBooks();
+  } catch(error) {
+    message.textContent = error.message;
+  }
+}
+
+loadBooks().catch(error => {
+  document.getElementById('message').textContent =
+    'Could not load books: ' + error.message;
+});
+</script>
+</body>
+</html>
