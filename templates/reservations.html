@@ -1,38 +1,244 @@
+
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BookNest - Reservations</title>
+
 <style>
-  body { font-family:'Segoe UI',system-ui,sans-serif; background:#0f1226; color:#eef0ff; margin:0; }
-  header { background:linear-gradient(135deg,#3a2c9b,#7c5cff 55%,#00d4c8); padding:28px 6vw; }
-  header a { color:#fff; text-decoration:none; opacity:.85; font-weight:600; }
-  header h1 { margin-top:8px; }
-  main { padding:30px 6vw; }
-  table { width:100%; border-collapse:collapse; background:#1a1e3a; border-radius:16px; overflow:hidden; }
-  th, td { padding:14px 18px; text-align:left; border-bottom:1px solid #2b3060; }
-  th { color:#9aa0cf; font-size:.8rem; text-transform:uppercase; letter-spacing:.05em; }
-  td.id { color:#00d4c8; font-weight:700; }
-  .empty { color:#9aa0cf; padding:30px; text-align:center; }
+  * { box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f1226;
+    color: #eef0ff;
+    margin: 0;
+  }
+
+  header {
+    background: linear-gradient(135deg, #3a2c9b, #7c5cff 55%, #00d4c8);
+    padding: 28px 6vw;
+  }
+
+  header a {
+    color: #fff;
+    text-decoration: none;
+    opacity: .9;
+    font-weight: 600;
+  }
+
+  header h1 { margin-top: 12px; }
+
+  main { padding: 30px 6vw; }
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .toolbar p { color: #9aa0cf; }
+
+  .table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 16px;
+  }
+
+  table {
+    width: 100%;
+    min-width: 680px;
+    border-collapse: collapse;
+    background: #1a1e3a;
+  }
+
+  th, td {
+    padding: 14px 18px;
+    text-align: left;
+    border-bottom: 1px solid #2b3060;
+  }
+
+  th {
+    color: #9aa0cf;
+    font-size: .8rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+
+  td.id { color: #00d4c8; font-weight: 700; }
+
+  .empty {
+    color: #9aa0cf;
+    padding: 35px;
+    text-align: center;
+    background: #1a1e3a;
+    border-radius: 16px;
+  }
+
+  button {
+    border: 0;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .cancel-btn {
+    background: #ff5470;
+    color: white;
+  }
+
+  .cancel-btn:hover { background: #e83b58; }
+
+  .back-btn {
+    background: #7c5cff;
+    color: white;
+    text-decoration: none;
+    padding: 11px 16px;
+    border-radius: 8px;
+    display: inline-block;
+  }
+
+  .message {
+    display: none;
+    padding: 13px 16px;
+    border-radius: 10px;
+    margin-bottom: 18px;
+  }
+
+  .message.show { display: block; }
+  .message.success { background: #164b45; color: #9dfff0; }
+  .message.error { background: #572738; color: #ffd5de; }
+
+  @media (max-width: 600px) {
+    main { padding: 22px 4vw; }
+    header { padding: 24px 4vw; }
+  }
 </style>
 </head>
+
 <body>
+
 <header>
   <a href="/">← Back to library</a>
-  <h1>📋 Reservations</h1>
+  <h1>📋 My Reservations</h1>
+  <p>View your reserved books and manage reservations.</p>
 </header>
+
 <main>
+  <div class="toolbar">
+    <p id="reservationCount">
+      {{ rows|length }} reservation(s)
+    </p>
+    <a class="back-btn" href="/admin">Admin Dashboard</a>
+  </div>
+
+  <div id="message" class="message" role="status" aria-live="polite"></div>
+
   {% if rows %}
-  <table>
-    <tr><th>ID</th><th>Book</th><th>Student</th><th>Reserved at</th></tr>
-    {% for r in rows %}
-    <tr><td class="id">#{{ r['id'] }}</td><td>{{ r['book_title'] }}</td><td>{{ r['student'] }}</td><td>{{ r['reserved_at'] }}</td></tr>
-    {% endfor %}
-  </table>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Book</th>
+          <th>Student</th>
+          <th>Reserved At</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody id="reservationRows">
+        {% for r in rows %}
+        <tr id="reservation-{{ r['id'] }}">
+          <td class="id">#{{ r['id'] }}</td>
+          <td>{{ r['book_title'] }}</td>
+          <td>{{ r['student'] }}</td>
+          <td>{{ r['reserved_at'] }}</td>
+          <td>
+            <button
+              class="cancel-btn"
+              onclick="cancelReservation({{ r['id'] }}, this)">
+              Cancel
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
   {% else %}
-  <div class="empty">No reservations yet.</div>
+  <div class="empty" id="emptyMessage">
+    <h2>📚 No reservations yet</h2>
+    <p>Visit the library and reserve your first book!</p>
+    <a class="back-btn" href="/">Browse Books</a>
+  </div>
   {% endif %}
 </main>
+
+<script>
+function showMessage(text, type) {
+  const box = document.getElementById('message');
+  box.textContent = text;
+  box.className = 'message show ' + type;
+}
+
+async function cancelReservation(id, button) {
+  if (!confirm('Are you sure you want to cancel this reservation?')) {
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = 'Cancelling...';
+
+  try {
+    const response = await fetch(`/api/reservations/${id}`, {
+      method: 'DELETE'
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Could not cancel reservation');
+    }
+
+    const row = document.getElementById(`reservation-${id}`);
+    if (row) row.remove();
+
+    const tbody = document.getElementById('reservationRows');
+    const remaining = tbody ? tbody.querySelectorAll('tr').length : 0;
+
+    document.getElementById('reservationCount').textContent =
+      remaining + ' reservation(s)';
+
+    if (remaining === 0) {
+      const wrap = document.querySelector('.table-wrap');
+      if (wrap) wrap.remove();
+
+      const empty = document.createElement('div');
+      empty.id = 'emptyMessage';
+      empty.className = 'empty';
+      empty.innerHTML =
+        '<h2>📚 No reservations yet</h2>' +
+        '<p>Visit the library and reserve your first book!</p>' +
+        '<a class="back-btn" href="/">Browse Books</a>';
+
+      document.querySelector('main').appendChild(empty);
+    }
+
+    showMessage('Reservation cancelled successfully!', 'success');
+
+  } catch (error) {
+    showMessage(error.message || 'Something went wrong.', 'error');
+    button.disabled = false;
+    button.textContent = 'Cancel';
+  }
+}
+</script>
+
 </body>
 </html>
